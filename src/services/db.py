@@ -8,28 +8,39 @@ load_dotenv()
 supabase = get_supabase_client()
 
 def get_open_SL_orders():
-    """Returns open SL orders with their groups info in 'order_groups' field. """
+    """Returns open SL orders with their groups info in 'order_group' field."""
     logging.info("Trying to get open SL orders from DB...")
     try:
+        # Step 1: Fetch relevant orders
         orders_resp = supabase.table("orders") \
             .select("*") \
             .eq("order_type", "STOP_MARKET") \
             .eq("status", "NEW") \
             .execute()
-        orders = orders_resp.data
+        orders = orders_resp.data or []
+        if not orders:
+            logging.info("No open SL orders found.")
+            return []
+
+        # Step 2: Fetch corresponding order groups, filtering out BE type directly
         order_ids = list({order['order_id'] for order in orders})
         groups_resp = supabase.table("order_groups") \
-        .select("*") \
-        .in_("order_id", order_ids) \
-        .execute()
+            .select("*") \
+            .in_("order_id", order_ids) \
+            .neq("type", "BE") \
+            .execute()
+        groups = groups_resp.data or []
 
-        groups = groups_resp.data
+        # Step 3: Map and merge
         group_map = {g['order_id']: g for g in groups}
         orders_with_groups = [
-            {**order, "order_group": group_map.get(order['order_id'])}
-            for order in orders
+            {**order, "order_group": group_map[order['order_id']]}
+            for order in orders if order['order_id'] in group_map
         ]
-        logging.info(f"Retrived open SL orders: {orders_with_groups}")
+
+        logging.info(f"Retrieved open SL orders: {orders_with_groups}")
         return orders_with_groups
-    except Exception as e: 
-        print("There's an issue getting one order from supabase: ", e)
+
+    except Exception as e:
+        logging.exception("Error retrieving open SL orders from Supabase")
+        return []

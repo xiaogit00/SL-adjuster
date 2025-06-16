@@ -1,12 +1,15 @@
 from src.services import binanceREST
 from src.services import db
+from src.utils.logger import init_logger
 import unittest
 import asyncio
 
 
 class TestDB(unittest.TestCase):
+    def setUp(self):
+        init_logger()
     def test_bianance(self):
-        res = binanceREST.set_stop_loss('SOLUSDT', "SELL", 150, 0.09)
+        res = binanceREST.set_stop_loss('SOLUSDT', "BUY", 140, 5.04)
         print(res)
 
 

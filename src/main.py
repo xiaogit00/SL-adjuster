@@ -18,7 +18,7 @@ async def main():
         if not open_SL_trades: continue
         adjustment_orders = stoploss_adjuster.check_for_SL_adjustments(open_SL_trades, close_price)
         stoploss_adjuster.adjust_SL_orders(adjustment_orders)
-        logging.info("🚀 SL adjustments complete!")
+        logging.info("🔚 Exiting one cycle of candle price check.")
  
 
 asyncio.run(main())

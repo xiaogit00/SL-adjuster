@@ -3,7 +3,11 @@ class FileFuncFormatter(logging.Formatter):
     def format(self, record):
         combined = f"{record.filename}::{record.funcName}()"
         record.filefunc = f"{combined:<37}"  # Left-align in 35-char field
-        return super().format(record)
+        base = super().format(record)
+        if record.exc_info:
+            exc_text = self.formatException(record.exc_info)
+            return f"{base}\n{exc_text}"
+        return base
     
 def init_logger():
     log_format = (

@@ -16,21 +16,20 @@ def adjust_SL_orders(adjustment_orders):
         binanceREST.cancel_stop_market_orders(symbol, order_id)
         new_stoploss = None
         try:
-            new_stoploss = binanceREST.set_stop_loss(symbol, side, breakeven_price, qty)
+            new_stoploss_order_id = binanceREST.set_stop_loss(symbol, side, breakeven_price, qty)
         except:
             logging.error("Attempting to retry set stop loss...")
-            new_stoploss = binanceREST.set_stop_loss(symbol, side, breakeven_price, qty)
-        if not new_stoploss:
+            new_stoploss_order_id = binanceREST.set_stop_loss(symbol, side, breakeven_price, qty)
+        if not new_stoploss_order_id:
             logging.error(f"❌ Did not manage to set stop loss for {order_id}, continue to next order.")
             continue
-        stoploss_order_id = new_stoploss['orderId']
         direction = "LONG" if side == "SELL" else "SHORT"
 
         # Log new stop loss into Supabase       
         group_order_data = {
             "group_id": group_id,
-            "order_id": stoploss_order_id,
-            "type": "SL",
+            "order_id": new_stoploss_order_id,
+            "type": "BE",
             "direction": direction,
             "breakeven_threshold": 0.00,
             "breakeven_price": 0.00
@@ -51,9 +50,13 @@ def check_for_SL_adjustments(open_sl_orders, close_price) -> list: #TO-DO
         direction = order['direction']
         if direction == "LONG":
             if close_price > float(order['order_group']['breakeven_threshold']):
+                logging.info(f"✅ Breakeven adjustment will be made.")
                 adjustments.append(order)
         elif direction == "SHORT":
             if close_price < float(order['order_group']['breakeven_threshold']):
+                logging.info(f"✅ Breakeven adjustment will be made.")
                 adjustments.append(order)
     # If direction is LONG, then 
+    if not adjustments:
+        logging.info(f"😉 No trades need to be adjusted.")
     return adjustments

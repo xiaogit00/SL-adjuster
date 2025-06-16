@@ -5,6 +5,7 @@ import requests
 import logging 
 import os 
 from dotenv import load_dotenv
+from typing import Optional
 
 load_dotenv()
 
@@ -58,7 +59,9 @@ def cancel_stop_market_orders(symbol, orderid):
         logging.error(f"⚠️ Request exception: {e}")
 
 
-def set_stop_loss(symbol, side, stop_price, quantity):
+def set_stop_loss(symbol, side, stop_price, quantity) -> Optional[int]:
+    logging.info(f"Entering set_stop_loss with params: symbol: {symbol}, side: {side}, stop_price: {stop_price}, quantity: {quantity}")
+    direction = "LONG" if side == "SELL" else "SHORT"
     params = {
         'symbol': symbol,
         'side': side,
@@ -69,8 +72,13 @@ def set_stop_loss(symbol, side, stop_price, quantity):
     }
     try:
         res = _post('/fapi/v1/order', params)
-        logging.info(f"Successfully executed STOPLOSS ORDER with ID: {res['orderId']}")
-        return res
+        logging.info(f"Res received from placing stop_loss order: {res}")
+        if res.get('code') == -2021:
+            logging.error(f"❌ The SL trade price is {"lower" if side == "BUY" else "higher"} than current price for this {direction} trade, stop_loss order not successfully executed.")
+            return None
+        if res.get('orderId'):
+            logging.info(f"✅ Order successfully executed with orderId: {res.get('orderId')}")
+            return res.get('orderId')
     except Exception as e:
-        logging.error(f"An error occurred in BinanceFuturesTrader.set_stop_loss | Error: {e}")
+        logging.exception(f"❌ An error occurred in BinanceREST.set_stop_loss | Error: {e}")
         raise e
