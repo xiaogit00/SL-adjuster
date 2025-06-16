@@ -4,17 +4,19 @@ import logging
 
 
 def adjust_SL_orders(adjustment_orders):
+    order_ids = []
     for order in adjustment_orders:
         logging.info(f"Attempting to adjust SL the following order: {order}")
 
         order_id = order['order_id']
+        order_ids.append(order_id)
         symbol = order['symbol']
         side = order['side']
         breakeven_price = order['order_group']['breakeven_price']
         qty = order['qty']
         group_id = order['order_group']['group_id']
         binanceREST.cancel_stop_market_orders(symbol, order_id)
-        new_stoploss = None
+        new_stoploss_order_id = None
         try:
             new_stoploss_order_id = binanceREST.set_stop_loss(symbol, side, breakeven_price, qty)
         except:
@@ -36,10 +38,11 @@ def adjust_SL_orders(adjustment_orders):
         }
         try:
             log_into_supabase(group_order_data)
-            logging.info("NEW STOPLOSS Order logged to Supabase")
-        
+            logging.info("✅ NEW Breakeven Order logged to Supabase")
+            logging.info(f"✅ Successfully adjusted one SL order: {order_id}")
         except Exception as e:
             logging.error(f"Failed to log NEW STOPLOSS trade to Supabase: {e}")
+    logging.info(f"✅ Successfully adjusted all SL orders: {order_ids}")
 
 def check_for_SL_adjustments(open_sl_orders, close_price) -> list: #TO-DO
     logging.info("Checking whether SL orders hit close price with params: ")
