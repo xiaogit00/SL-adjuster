@@ -1,18 +1,21 @@
 
 from dotenv import load_dotenv
 from src.utils.supabase_client import get_supabase_client
-import logging
+import logging, os
 from datetime import datetime
 
 load_dotenv()
 supabase = get_supabase_client()
+orders_table = "orders" if os.getenv("STRATEGY_ENV") == 1 else "orders2"
+order_groups_table = "order_groups" if os.getenv("STRATEGY_ENV") == 1 else "order_groups2"
+trades_table = "trades" if os.getenv("STRATEGY_ENV") == 1 else "trades2"
 
 def get_open_SL_orders():
     """Returns open SL orders with their groups info in 'order_group' field."""
     logging.info("Trying to get open SL orders from DB...")
     try:
         # Step 1: Fetch relevant orders
-        orders_resp = supabase.table("orders") \
+        orders_resp = supabase.table(orders_table) \
             .select("*") \
             .eq("order_type", "STOP_MARKET") \
             .eq("status", "NEW") \
@@ -24,7 +27,7 @@ def get_open_SL_orders():
 
         # Step 2: Fetch corresponding order groups, filtering out BE type directly
         order_ids = list({order['order_id'] for order in orders})
-        groups_resp = supabase.table("order_groups") \
+        groups_resp = supabase.table(order_groups_table) \
             .select("*") \
             .in_("order_id", order_ids) \
             .neq("type", "BE") \

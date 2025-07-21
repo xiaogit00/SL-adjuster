@@ -1,11 +1,17 @@
 import requests, os
 import time
+from dotenv import load_dotenv
 supabase_url = os.getenv("SUPABASE_URL")
 supbase_api_key = os.getenv("SUPABASE_API_KEY")
 supabase_jwt = os.getenv("SUPABASE_JWT")
 import logging
 
-def log_into_supabase(data, table_name="order_groups"):
+load_dotenv()
+orders_table = "orders" if os.getenv("STRATEGY_ENV") == 1 else "orders2"
+order_groups_table = "order_groups" if os.getenv("STRATEGY_ENV") == 1 else "order_groups2"
+trades_table = "trades" if os.getenv("STRATEGY_ENV") == 1 else "trades2"
+
+def log_into_supabase(data, table_name=order_groups_table):
     logging.info(f"Attempting to add entry into order_groups with params: {data}")
     url = f"{supabase_url}/rest/v1/{table_name}"
     headers = {
