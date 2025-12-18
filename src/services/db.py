@@ -25,13 +25,13 @@ def get_open_SL_orders():
             logging.info("No open SL orders found.")
             return []
 
-        # Step 2: Fetch corresponding order groups, filtering out BE type directly
+        # Step 2: Append the latest SL order from the order_group into the order data
         order_ids = list({order['order_id'] for order in orders})
         groups_resp = supabase.table(order_groups_table) \
             .select("*") \
             .in_("order_id", order_ids) \
-            .neq("type", "BE") \
-            .execute()
+            .eq("type", "SL") \
+            .execute() # TO DO: FILTER FOR LATEST SL ONLY
         groups = groups_resp.data or []
 
         # Step 3: Map and merge
