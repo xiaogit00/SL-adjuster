@@ -13,11 +13,17 @@ async def main():
         new_price = await binance_price_queue.get()
         logging.info("🔴 Awaiting next event in queue from Binance event websocket...")
         logging.info(f"😱 Received new Binance event! Event: {new_price}")
-        close_price = float(new_price['c'])
-        open_SL_trades = db.get_open_SL_orders() # Ref response in sample_api
-        if not open_SL_trades: continue
-        adjustment_orders = stoploss_adjuster.check_for_SL_adjustments(open_SL_trades, close_price)
-        stoploss_adjuster.adjust_SL_orders(adjustment_orders)
+        candle_data = {
+            "close": float(new_price['c']),
+            "open": float(new_price['o']),
+            "low": float(new_price['l']),
+            "high": float(new_price['h']),
+        }
+        order_enriched = db.get_latest_open_SL_order() # Ref response in sample_api
+        if len(order_enriched) < 1: continue
+        should_adjust = stoploss_adjuster.check_for_SL_adjustment(order_enriched, candle_data['close'])
+        if should_adjust:
+            stoploss_adjuster.adjust_SL_order(order_enriched, candle_data)
         logging.info("🔚 Exiting one cycle of candle price check.")
  
 

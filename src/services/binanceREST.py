@@ -58,6 +58,30 @@ def cancel_stop_market_orders(symbol, orderid):
     except requests.RequestException as e:
         logging.error(f"⚠️ Request exception: {e}")
 
+def cancel_algo_orders(symbol, algoId):
+    url = f"{BASE_URL}/fapi/v1/algoOrder"
+    headers = {
+        'X-MBX-APIKEY': api_key
+    }
+
+    timestamp = int(time.time() * 1000)
+    params = {
+        'symbol': symbol.upper(),
+        'algoid': algoId,
+        'timestamp': timestamp
+    }
+    params['signature'] = _sign(params)
+
+    try: 
+        response = requests.delete(url, headers=headers, params=params)
+        if response.status_code == 200: 
+            logging.info(f"✅ Stop loss order {algoId} for {symbol} canceled.")
+            return response.json()
+        else:
+            logging.warning(f"❌ Error canceling Stop loss order: {response.status_code} - {response.text}")
+    except requests.RequestException as e:
+        logging.error(f"⚠️ Request exception: {e}")
+
 
 def set_stop_loss(symbol, side, stop_price, quantity) -> Optional[int]:
     logging.info(f"Entering set_stop_loss with params: symbol: {symbol}, side: {side}, stop_price: {stop_price}, quantity: {quantity}")
@@ -82,3 +106,34 @@ def set_stop_loss(symbol, side, stop_price, quantity) -> Optional[int]:
     except Exception as e:
         logging.exception(f"❌ An error occurred in BinanceREST.set_stop_loss | Error: {e}")
         raise e
+
+def execute_stop_loss_algo_order(symbol, side, trigger_price, qty):
+    url = f"{BASE_URL}/fapi/v1/algoOrder"
+
+    headers = {
+        'X-MBX-APIKEY': api_key
+    }
+    timestamp = int(time.time() * 1000)
+    params = {
+        'algoType': "CONDITIONAL",
+        'symbol': symbol,
+        'side': side, # BUY / SELL
+        'reduceOnly': "true", # This prevents the case of a 'naked' stop loss order, where in the case of an already closed position, Binance will open a Short position on SL trigger.
+        'positionSide': 'BOTH', # (Optional) Default BOTH for One-way Mode ; LONG or SHORT for Hedge Mode. It must be sent in Hedge Mode.
+        'type': 'STOP_MARKET',
+        'triggerPrice': str(trigger_price),
+        'quantity': str(qty),
+        'workingType': 'MARK_PRICE',
+        'timestamp': timestamp
+    }
+    params['signature'] = _sign(params)
+
+    try: 
+        response = requests.post(url, params=params, headers=headers)
+        if response.status_code == 200: 
+            logging.info(f"✅ Stop loss order {response} created.")
+            return response.json()
+        else:
+            logging.warning(f"❌ Error making Stop loss order: {response.status_code} - {response.text}")
+    except requests.RequestException as e:
+        logging.error(f"⚠️ Request exception: {e}")

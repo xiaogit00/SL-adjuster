@@ -1,0 +1,12 @@
+{
+    "order_id": 189088390711,
+    "status": "NEW",
+    "symbol": "SOLUSDT",
+    "side": "BUY",
+    "type": "STOP_MARKET",
+    "qty": "0.04",
+    "direction": "LONG",
+    "created_at": 1768307124289,
+    "order_group_data": order_group_data,
+    "candle_data": order_candle_data
+}
