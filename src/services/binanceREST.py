@@ -58,7 +58,7 @@ def cancel_stop_market_orders(symbol, orderid):
     except requests.RequestException as e:
         logging.error(f"⚠️ Request exception: {e}")
 
-def cancel_algo_orders(symbol, algoId):
+def cancel_algo_order(symbol, algoId):
     url = f"{BASE_URL}/fapi/v1/algoOrder"
     headers = {
         'X-MBX-APIKEY': api_key
@@ -78,10 +78,34 @@ def cancel_algo_orders(symbol, algoId):
             logging.info(f"✅ Stop loss order {algoId} for {symbol} canceled.")
             return response.json()
         else:
-            logging.warning(f"❌ Error canceling Stop loss order: {response.status_code} - {response.text}")
+            logging.critical(f"❌ Error canceling Stop loss order: {response.status_code} - {response.text}, terminating program")
     except requests.RequestException as e:
         logging.error(f"⚠️ Request exception: {e}")
+        raise
 
+def cancel_algo_orders(symbol):
+    url = f"{BASE_URL}/fapi/v1/algoOpenOrders"
+    headers = {
+        'X-MBX-APIKEY': api_key
+    }
+
+    timestamp = int(time.time() * 1000)
+    params = {
+        'symbol': symbol.upper(),
+        'timestamp': timestamp
+    }
+    params['signature'] = _sign(params)
+
+    try: 
+        response = requests.delete(url, headers=headers, params=params)
+        if response.status_code == 200: 
+            logging.info(f"✅ All Stop loss order for {symbol} canceled.")
+            return response.json()
+        else:
+            logging.critical(f"❌ Error canceling Stop loss order: {response.status_code} - {response.text}, terminating program")
+    except requests.RequestException as e:
+        logging.error(f"⚠️ Request exception: {e}")
+        raise
 
 def set_stop_loss(symbol, side, stop_price, quantity) -> Optional[int]:
     logging.info(f"Entering set_stop_loss with params: symbol: {symbol}, side: {side}, stop_price: {stop_price}, quantity: {quantity}")
