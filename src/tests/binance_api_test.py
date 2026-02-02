@@ -9,7 +9,7 @@ class TestDB(unittest.TestCase):
     def setUp(self):
         init_logger()
     def test_bianance(self):
-        res = binanceREST.set_stop_loss('SOLUSDT', "BUY", 140, 5.04)
+        res = binanceREST.execute_stop_loss_algo_order('SOLUSDT', "SELL", 93.10033, 5.04)
         print(res)
 
 

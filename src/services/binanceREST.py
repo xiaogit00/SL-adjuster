@@ -133,7 +133,7 @@ def set_stop_loss(symbol, side, stop_price, quantity) -> Optional[int]:
 
 def execute_stop_loss_algo_order(symbol, side, trigger_price, qty):
     url = f"{BASE_URL}/fapi/v1/algoOrder"
-
+    
     headers = {
         'X-MBX-APIKEY': api_key
     }

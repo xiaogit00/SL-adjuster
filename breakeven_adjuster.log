@@ -1,0 +1,12 @@
+2026-02-02 19:54:42 | INFO   | binanceREST.py::set_stop_loss()       | Entering set_stop_loss with params: symbol: SOLUSDT, side: BUY, stop_price: 140, quantity: 5.04
+2026-02-02 19:54:42 | INFO   | binanceREST.py::set_stop_loss()       | Res received from placing stop_loss order: {'code': -2015, 'msg': 'Invalid API-key, IP, or permissions for action, request ip: 137.132.26.109'}
+2026-02-02 19:55:14 | INFO   | binanceREST.py::set_stop_loss()       | Entering set_stop_loss with params: symbol: SOLUSDT, side: BUY, stop_price: 140, quantity: 5.04
+2026-02-02 19:55:14 | INFO   | binanceREST.py::set_stop_loss()       | Res received from placing stop_loss order: {'code': -2015, 'msg': 'Invalid API-key, IP, or permissions for action, request ip: 137.132.26.115'}
+2026-02-02 19:56:34 | INFO   | binanceREST.py::set_stop_loss()       | Entering set_stop_loss with params: symbol: SOLUSDT, side: BUY, stop_price: 140, quantity: 5.04
+2026-02-02 19:56:35 | INFO   | binanceREST.py::set_stop_loss()       | Res received from placing stop_loss order: {'code': -2015, 'msg': 'Invalid API-key, IP, or permissions for action, request ip: 137.132.26.109'}
+2026-02-02 19:58:23 | INFO   | binanceREST.py::set_stop_loss()       | Entering set_stop_loss with params: symbol: SOLUSDT, side: BUY, stop_price: 140, quantity: 5.04
+2026-02-02 19:58:24 | INFO   | binanceREST.py::set_stop_loss()       | Res received from placing stop_loss order: {'code': -4120, 'msg': 'Order type not supported for this endpoint. Please use the Algo Order API endpoints instead.'}
+2026-02-02 19:59:22 | WARNING | binanceREST.py::execute_stop_loss_algo_order() | ❌ Error making Stop loss order: 400 - {"code":-2021,"msg":"Order would immediately trigger."}
+2026-02-02 19:59:33 | INFO   | binanceREST.py::execute_stop_loss_algo_order() | ✅ Stop loss order <Response [200]> created.
+2026-02-02 20:01:15 | INFO   | binanceREST.py::execute_stop_loss_algo_order() | ✅ Stop loss order <Response [200]> created.
+2026-02-02 20:01:24 | WARNING | binanceREST.py::execute_stop_loss_algo_order() | ❌ Error making Stop loss order: 400 - {"code":-1111,"msg":"Precision is over the maximum defined for this asset."}

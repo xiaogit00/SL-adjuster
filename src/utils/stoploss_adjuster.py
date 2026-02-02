@@ -11,7 +11,7 @@ def adjust_SL_order(order_enriched, candle_price):
     order_id = order_enriched['order_id']
     symbol = order_enriched['symbol']
     side = order_enriched['side']
-    next_stoploss_price = order_enriched['order_group_data']['next_stoploss_price']
+    next_stoploss_price = round(float(order_enriched['order_group_data']['next_stoploss_price']), 4)
     qty = order_enriched['qty']
     group_id = order_enriched['order_group_data']['group_id']
     binanceREST.cancel_algo_order(symbol, order_id)
